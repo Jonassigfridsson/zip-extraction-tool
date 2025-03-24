@@ -5,18 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GIS ZIP File Uploader</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        #map { height: 500px; width: 80%; margin: auto; border: 1px solid #ddd; }
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background-color: #1e1e1e;
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+
+        h2 {
+            margin-top: 20px;
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* File Upload Button */
+        .file-upload {
+            margin: 20px;
+        }
+
+        .file-upload input {
+            display: none;
+        }
+
+        .upload-label {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease-in-out;
+        }
+
+        .upload-label:hover {
+            background-color: #2980b9;
+        }
+
+        /* Map Container */
+        #map {
+            height: 500px;
+            width: 80%;
+            margin: auto;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+            margin-top: 10px;
+        }
+
+        /* Loading Indicator */
+        #loading {
+            display: none;
+            font-size: 16px;
+            margin-top: 10px;
+        }
     </style>
-    <!-- Include Leaflet.js for map rendering -->
+
+    <!-- Leaflet.js for Map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Include shp.js for handling ZIP files -->
+    <!-- shp.js for ZIP File Processing -->
     <script src="https://unpkg.com/shpjs@latest/dist/shp.js"></script>
 </head>
 <body>
-    <h2>Upload ZIP File with GIS Data</h2>
-    <input type="file" id="fileInput" accept=".zip">
+
+    <h2>Upload GIS Data (ZIP File)</h2>
+    
+    <div class="file-upload">
+        <input type="file" id="fileInput" accept=".zip">
+        <label for="fileInput" class="upload-label">Choose a ZIP File</label>
+    </div>
+
+    <p id="loading">Processing file... Please wait.</p>
+    
     <div id="map"></div>
 
     <script>
@@ -29,6 +94,8 @@
         document.getElementById("fileInput").addEventListener("change", async function(event) {
             const file = event.target.files[0];
             if (!file) return;
+
+            document.getElementById("loading").style.display = "block"; // Show loading text
 
             const reader = new FileReader();
             reader.onload = async function(event) {
@@ -45,19 +112,22 @@
                     });
 
                     // Add extracted GeoJSON to the map
-                    L.geoJSON(geojson, {
-                        style: { color: "blue", weight: 2 },
-                        pointToLayer: (feature, latlng) => L.circleMarker(latlng, { radius: 6, color: "red" })
+                    let geoLayer = L.geoJSON(geojson, {
+                        style: { color: "#00ff00", weight: 2 },
+                        pointToLayer: (feature, latlng) => L.circleMarker(latlng, { radius: 6, color: "#ff4500" })
                     }).addTo(map);
 
-                    map.fitBounds(L.geoJSON(geojson).getBounds()); // Zoom to layer
+                    map.fitBounds(geoLayer.getBounds()); // Zoom to layer
                 } catch (error) {
                     console.error("Error extracting data:", error);
                     alert("Error processing the ZIP file. Please ensure it contains valid GIS data.");
                 }
+                document.getElementById("loading").style.display = "none"; // Hide loading text
             };
             reader.readAsArrayBuffer(file);
         });
     </script>
+
 </body>
 </html>
+
