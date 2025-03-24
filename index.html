@@ -3,26 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GIS ZIP File Uploader</title>
+    <title>GIS ZIP Extractor</title>
     <style>
-        /* General Styles */
         body {
             font-family: 'Arial', sans-serif;
             text-align: center;
             background-color: #1e1e1e;
             color: white;
             margin: 0;
-            padding: 0;
+            padding: 20px;
         }
 
         h2 {
-            margin-top: 20px;
             font-size: 24px;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
-        /* File Upload Button */
         .file-upload {
             margin: 20px;
         }
@@ -46,18 +43,6 @@
             background-color: #2980b9;
         }
 
-        /* Map Container */
-        #map {
-            height: 500px;
-            width: 80%;
-            margin: auto;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
-            margin-top: 10px;
-        }
-
-        /* Loading Indicator */
         #loading {
             display: none;
             font-size: 16px;
@@ -65,9 +50,6 @@
         }
     </style>
 
-    <!-- Leaflet.js for Map -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- shp.js for ZIP File Processing -->
     <script src="https://unpkg.com/shpjs@latest/dist/shp.js"></script>
 </head>
@@ -81,16 +63,8 @@
     </div>
 
     <p id="loading">Processing file... Please wait.</p>
-    
-    <div id="map"></div>
 
     <script>
-        // Initialize Leaflet Map
-        let map = L.map('map').setView([59.3293, 18.0686], 5); // Center on Sweden
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-
         document.getElementById("fileInput").addEventListener("change", async function(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -104,20 +78,9 @@
                     const geojson = await shp(arrayBuffer); // Extract GeoJSON from ZIP
                     console.log("Extracted GeoJSON:", geojson);
 
-                    // Remove existing layers before adding new data
-                    map.eachLayer((layer) => {
-                        if (layer instanceof L.GeoJSON) {
-                            map.removeLayer(layer);
-                        }
-                    });
+                    // Send data to Experience Builder
+                    window.parent.postMessage({ type: "addData", geojson: geojson }, "*");
 
-                    // Add extracted GeoJSON to the map
-                    let geoLayer = L.geoJSON(geojson, {
-                        style: { color: "#00ff00", weight: 2 },
-                        pointToLayer: (feature, latlng) => L.circleMarker(latlng, { radius: 6, color: "#ff4500" })
-                    }).addTo(map);
-
-                    map.fitBounds(geoLayer.getBounds()); // Zoom to layer
                 } catch (error) {
                     console.error("Error extracting data:", error);
                     alert("Error processing the ZIP file. Please ensure it contains valid GIS data.");
@@ -130,4 +93,3 @@
 
 </body>
 </html>
-
