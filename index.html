@@ -3,13 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZIP File Uploader</title>
+    <title>GIS ZIP File Uploader</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        #map { height: 500px; width: 80%; margin: auto; border: 1px solid #ddd; }
+    </style>
+    <!-- Include Leaflet.js for map rendering -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Include shp.js for handling ZIP files -->
+    <script src="https://unpkg.com/shpjs@latest/dist/shp.js"></script>
 </head>
 <body>
     <h2>Upload ZIP File with GIS Data</h2>
     <input type="file" id="fileInput" accept=".zip">
-    <script src="https://unpkg.com/shpjs@latest/dist/shp.js"></script>
+    <div id="map"></div>
+
     <script>
+        // Initialize Leaflet Map
+        let map = L.map('map').setView([59.3293, 18.0686], 5); // Center on Sweden
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
         document.getElementById("fileInput").addEventListener("change", async function(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -18,12 +34,26 @@
             reader.onload = async function(event) {
                 const arrayBuffer = event.target.result;
                 try {
-                    const geojson = await shp(arrayBuffer);
+                    const geojson = await shp(arrayBuffer); // Extract GeoJSON from ZIP
                     console.log("Extracted GeoJSON:", geojson);
-                    alert("GeoJSON extracted! Check console for details.");
+
+                    // Remove existing layers before adding new data
+                    map.eachLayer((layer) => {
+                        if (layer instanceof L.GeoJSON) {
+                            map.removeLayer(layer);
+                        }
+                    });
+
+                    // Add extracted GeoJSON to the map
+                    L.geoJSON(geojson, {
+                        style: { color: "blue", weight: 2 },
+                        pointToLayer: (feature, latlng) => L.circleMarker(latlng, { radius: 6, color: "red" })
+                    }).addTo(map);
+
+                    map.fitBounds(L.geoJSON(geojson).getBounds()); // Zoom to layer
                 } catch (error) {
                     console.error("Error extracting data:", error);
-                    alert("Error processing the ZIP file.");
+                    alert("Error processing the ZIP file. Please ensure it contains valid GIS data.");
                 }
             };
             reader.readAsArrayBuffer(file);
