@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZIP File Uploader</title>
+</head>
+<body>
+    <h2>Upload ZIP File with GIS Data</h2>
+    <input type="file" id="fileInput" accept=".zip">
+    <script src="https://unpkg.com/shpjs@latest/dist/shp.js"></script>
+    <script>
+        document.getElementById("fileInput").addEventListener("change", async function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(event) {
+                const arrayBuffer = event.target.result;
+                try {
+                    const geojson = await shp(arrayBuffer);
+                    console.log("Extracted GeoJSON:", geojson);
+                    alert("GeoJSON extracted! Check console for details.");
+                } catch (error) {
+                    console.error("Error extracting data:", error);
+                    alert("Error processing the ZIP file.");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        });
+    </script>
+</body>
+</html>
