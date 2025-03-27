@@ -8,8 +8,8 @@
         body {
             font-family: 'Arial', sans-serif;
             text-align: center;
-            background-color: #1e1e1e;
-            color: white;
+            background-color: #003b4d;
+            color: blue;
             margin: 0;
             padding: 20px;
         }
@@ -30,7 +30,7 @@
 
         .upload-label {
             display: inline-block;
-            background-color: #3498db;
+            background-color: #003b4d;
             color: white;
             padding: 10px 20px;
             font-size: 16px;
@@ -40,7 +40,7 @@
         }
 
         .upload-label:hover {
-            background-color: #2980b9;
+            background-color: #006280;
         }
 
         #loading {
@@ -55,14 +55,14 @@
 </head>
 <body>
 
-    <h2>Upload GIS Data (ZIP File)</h2>
+    <h2>Ladda upp polygoner, linjer eller punkter (ZIP-Fil)</h2>
     
     <div class="file-upload">
         <input type="file" id="fileInput" accept=".zip">
-        <label for="fileInput" class="upload-label">Choose a ZIP File</label>
+        <label for="fileInput" class="upload-label">Välj ZIP-Fil</label>
     </div>
 
-    <p id="loading">Processing file... Please wait.</p>
+    <p id="loading">Bearbetar fil... vänligen vänta.</p>
 
     <script>
         document.getElementById("fileInput").addEventListener("change", async function(event) {
